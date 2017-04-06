@@ -22,6 +22,7 @@ socket.send_string(query)  #send start signal to server
 IP=socket.recv_string()  #receive number of letters in the word
 
 if IP.find('Error'):
+	print IP
 	print 'Address for given address not found'
 
 print 'The IP for ' , website, 'is ' , IP
