@@ -21,10 +21,12 @@ socket.send_string(query)  #send start signal to server
 #receives progress array
 IP=socket.recv_string()  #receive number of letters in the word
 
-if IP.find('Error'):
-	print IP
-	print 'Address for given address not found'
 
-print 'The IP for ' , website, 'is ' , IP
+if IP.find('Error')==0:
+	print IP.find("Error")
+	#print IP
+	print 'Address for given address not found'
+else:
+	print 'The IP for ' , website, 'is ' , IP
 
 
