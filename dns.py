@@ -21,7 +21,7 @@ socket.connect("tcp://localhost:"+str(port))
 website = raw_input('\nEnter website name for which you need IP\n')
 
 query = website.split('/')[0]
-request = dns_req+query
+request = dns_req+' '+query
 
 socket.send_string(request)  #send start signal to server
 

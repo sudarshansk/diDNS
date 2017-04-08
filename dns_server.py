@@ -22,7 +22,11 @@ dns_table.update({'default': ip_addr_default, 'www.google.com': ip_addr_google})
 def majority_check(ip_addr, url):
 	#request IPs
 	servers=[]	#list of port nos
-	dicti={ip_addr,1}
+	#defining dictionary
+	dicti={}
+	if ip_addr.find('Error')!=0:
+		dicti[ip_addr]=1
+	
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
 		socket.connect("tcp://localhost:"+str(server_port))
@@ -30,15 +34,21 @@ def majority_check(ip_addr, url):
 		IP = socket.recv_string()
 		if IP.find('Error')!=0:
 			if IP not in dicti:
-					dicti.append({IP:1})
-				else:
-					dicti[IP] = dicti[IP]+1
+					dicti[IP]=1
+			else:
+				dicti[IP] = dicti[IP]+1
 		socket_server.close()
 	#check majority
-	dicti = sorted(dicti,key=dicti.values(),reverse=true)
 	
-	ip_addr_new = next(iter(dicti))
-
+	try:
+		max_count = sorted(dicti.values(),reverse=True)[0]
+		for key,value in dicti.iteritems():
+			if value == max_count:
+				ip_addr_new = key
+				break
+		ip_addr_new = next(iter(dicti))
+	except:
+		ip_addr_new = 'Error - No entry found'
 	#return IPS
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
@@ -48,30 +58,35 @@ def majority_check(ip_addr, url):
 	return ip_addr_new
 
 
+print 'Server running on port - ' + port
 
 while(1):
 	# Wait for client to ping! 
 	response = socket.recv_string()
 	resp_list=response.split(' ')
-
+	url=resp_list[1]
 	if resp_list[0]=='0':
-		dns_table[resp_list[1]]=resp_list[2]
+		ip_addr_new = resp_list[2]
+		#DNS_Update
+		dns_table[url]=ip_addr_new
 
 	elif resp_list[0]=='1':
+		#DNS_Client_Request
 		try:
 			ip_addr=dns_table[url]
 		except KeyError:
 			ip_addr = 'Error - No entry found'
 			#add code to update
-			ip_new_addr = majority_check(ip_addr,url)
+		ip_addr_new = majority_check(ip_addr,url)
 		socket.send_string(ip_addr_new)	
 	elif resp_list[0]=='2':
+		#DNS_Server_Request
 		try:
 			ip_addr=dns_table[url]
 		except KeyError:
 			ip_addr = 'Error - No entry found'
 			#add code to update
-		socket.send_string(ip_addr_new)
+		socket.send_string(ip_addr)
 	else:
+		#Wrong!
 		print "request error"
-
