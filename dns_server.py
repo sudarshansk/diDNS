@@ -14,6 +14,37 @@ ip_addr_google = '1.2.3.4'
 dns_table = {}
 dns_table.update({'default': ip_addr_default, 'www.google.com': ip_addr_google})
 
+
+	#here the url needs to be matched with an IP and replied back.
+def majority_check():
+	#request IPs
+	IPs=[]
+	for server_port in servers:
+		socket_server = context.socket(zmq.REQ)
+		socket.connect("tcp://localhost:"+str(server_port))
+		socket.send_string(url)
+		IPs.append(socket.recv_string())  
+
+	#check majority
+	dicti={}
+	for IP in IPs:
+		if IP not in dicti:
+			dicti.append({IP:0})
+		else:
+			dicti[IP] = dicti[IP]+1
+
+	dicti = sorted(dicti,key=dicti.values(),reverse=true)
+	
+	ip_addr_new = next(iter(dicti))
+
+	#return IPS
+	for server_port in servers:
+		socket_server = context.socket(zmq.REQ)
+		socket.connect("tcp://localhost:"+str(server_port))
+		socket.send_string(ip_addr_new)  
+
+	return ip_addr_new
+
 while(1):
 	# Wait for client to ping! 
 	url = socket.recv_string()
@@ -23,6 +54,4 @@ while(1):
 		ip_addr = 'Error - No entry found'
 		#add code to update
 
-	#here the url needs to be matched with an IP and replied back.
-
-	socket.send_string(ip_addr)	
+	socket.send_string(ip_addr_new)	
