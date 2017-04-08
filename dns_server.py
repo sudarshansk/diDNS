@@ -43,13 +43,18 @@ def majority_check(ip_addr, url):
 		socket_server.close()
 	#check majority
 	
+	quorum_size = sum(dicti.values())
+	
 	try:
 		print dicti
 		max_count = sorted(dicti.values(),reverse=True)[0]
-		for key,value in dicti.iteritems():
-			if value == max_count:
-				ip_addr_new = key
-				break
+		if max_count>quorum_size/2.0:
+			for key,value in dicti.iteritems():
+				if value == max_count:
+					ip_addr_new = key
+					break
+		else:
+			ip_addr_new = ip_addr
 	except:
 		print dicti
 		ip_addr_new = 'Error - No entry found'
@@ -94,12 +99,10 @@ while(1):
 			ip_addr = 'Error - No entry found'
 			#add code to update
 		ip_addr_new = majority_check(ip_addr,url)
-
+		dns_table[url]=ip_addr_new
 		print 'UPDATED DNS TABLE\n',dns_table
-		#Issue - need to fix updating self table once reaching consensus
-		print 'boo'
 		socket.send_string(ip_addr_new)	
-		print 'boo1'
+		
 	elif response[0]=='2':
 		print 'IP request from DNS_server'
 		#DNS_Server_Request
