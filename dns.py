@@ -9,8 +9,10 @@ context = zmq.Context()
 
 #  Socket to talk to server
 #print("Connecting to hello world server")
+port = raw_input('\nEnter server port no\n')
+
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:5555")
+socket.connect("tcp://localhost:"+str(port))
 
 website = raw_input('\nEnter website name for which you need IP\n')
 
@@ -23,7 +25,7 @@ IP=socket.recv_string()  #receive number of letters in the word
 
 
 if IP.find('Error')==0:
-	print IP.find("Error")
+	#print IP.find("Error")
 	#print IP
 	print 'Address for given address not found'
 else:
