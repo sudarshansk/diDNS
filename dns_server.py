@@ -19,10 +19,13 @@ dns_table.update({'default': ip_addr_default, 'www.google.com': ip_addr_google})
 #here the url needs to be matched with an IP and replied back.
 def majority_check(ip_addr, url):
 	#request IPs
-	servers=[1300,1400]	#list of port nos
+	servers=[1200,1300]
+	servers.remove(int(port))	#list of port nos
+	print servers
 	#defining dictionary
 	dicti={}
 	if ip_addr.find('Error')!=0:
+		print 'IP found in base server'
 		dicti[ip_addr]=1
 		print dicti
 		#ip_addr_new = ip_addr
@@ -31,41 +34,52 @@ def majority_check(ip_addr, url):
 		
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
+		print 'Connecting to DNS server at port ', server_port
 		socket_server.connect("tcp://localhost:"+str(server_port))
 		socket_server.send_string(dns_serv_req+' '+url)
 		IP = socket_server.recv_string()
-		print IP
+		print 'IP from server is ' , IP
 		if IP.find('Error')!=0:
 			if IP not in dicti.keys():
 				dicti[IP]=1
 			else:
 				dicti[IP] = dicti[IP]+1
 		socket_server.close()
+		print 'Communication complete'
 	#check majority
 	
-	quorum_size = sum(dicti.values())
+	print 'Consolidated IPs from all servers'
+	print dicti
 	
 	try:
-		print dicti
+		quorum_size = sum(dicti.values())
+		print 'Quorum found with size ',quorum_size
 		max_count = sorted(dicti.values(),reverse=True)[0]
+		print 'Max count is ',max_count
 		if max_count>quorum_size/2.0:
 			for key,value in dicti.iteritems():
 				if value == max_count:
 					ip_addr_new = key
 					break
+			print 'Final IP decided is ', ip_addr_new
 		else:
 			ip_addr_new = ip_addr
+			print 'Final IP decided is ', ip_addr_new
 	except:
-		print dicti
+		print 'Quorum not found'
 		ip_addr_new = 'Error - No entry found'
 	
+	if ip_addr_new.find('Error')==0:
+		return ip_addr_new
 	#return IPS
+	print 'Updating other servers'
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
 		socket_server.connect("tcp://localhost:"+str(server_port))
 		socket_server.send_string(dns_upd+' '+url+' '+ip_addr_new)  
 		socket_server.close()
 	
+	print 'Updating complete'
 	return ip_addr_new
 
 
