@@ -7,9 +7,7 @@
 import zmq
 context = zmq.Context()
 
-dns_upd = '0'
-dns_req = '1'
-dns_serv_req = '2'
+dns_codes = {'dns_upd' : '0', 'dns_req' : '1', 'dns_serv_req' : '2'}
 
 #  Socket to talk to server
 #print("Connecting to hello world server")
@@ -21,7 +19,7 @@ socket.connect("tcp://localhost:"+str(port))
 website = raw_input('\nEnter website name for which you need IP\n')
 
 query = website.split('/')[0]
-request = dns_req+' '+query
+request = dns_codes['dns_req']+' '+query
 
 socket.send_string(request)  #send start signal to server
 
