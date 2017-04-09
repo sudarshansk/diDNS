@@ -8,7 +8,7 @@ dns_table = {}
 dns_table.update({'default': ip_addr_default, 'www.google.com': ip_addr_google})
 
 serv_num = input('\nEnter number of servers to run\n')
-dns_path='laddi'
+dns_path='dns_table.txt'
 servers = servers[:serv_num]
 a = ' '
 for port in servers:
@@ -17,7 +17,7 @@ print a
 server_paths=[]
 for port in servers:
 	cmd = "python dns_server.py "+str(port)+" "+dns_path+a
-	boo = "gnome-terminal -x sh -c \"xdotool getactivewindow; "+cmd+"; exit; bash\""
+	boo = "gnome-terminal -x sh -c \"xdotool getactivewindow; "+cmd+"; bash\""
 	os.system(boo)
 
 
