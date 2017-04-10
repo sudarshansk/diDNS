@@ -1,0 +1,4 @@
+default 8.8.8.8
+www.youtube.com 100.130.234.45
+nitk.ac.in 10.10.54.4
+quora.com 100.120.101.1

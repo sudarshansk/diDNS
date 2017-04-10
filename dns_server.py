@@ -1,5 +1,6 @@
 import zmq
 import sys
+from prettytable import PrettyTable
 
 
 
@@ -25,14 +26,13 @@ def majority_check(ip_addr, url, servers, dns_codes):
 	if ip_addr.find('Error')!=0:
 		print 'IP found in base server'
 		dicti[ip_addr]=1
-		print dicti
 		#ip_addr_new = ip_addr
 
 	#Requesting other servers for IP address to reach consensus.
 		
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
-		print 'Connecting to DNS server at port ', server_port
+		print '\nConnecting to DNS server at port ', server_port
 		socket_server.connect("tcp://localhost:"+str(server_port))
 		socket_server.send_string(dns_codes['dns_serv_req']+' '+url)
 		IP = socket_server.recv_string()
@@ -70,7 +70,7 @@ def majority_check(ip_addr, url, servers, dns_codes):
 	if ip_addr_new.find('Error')==0:
 		return ip_addr_new
 	#return IPS
-	print 'Updating other servers'
+	print '\nUpdating other servers'
 	for server_port in servers:
 		socket_server = context.socket(zmq.REQ)
 		socket_server.connect("tcp://localhost:"+str(server_port))
@@ -80,31 +80,42 @@ def majority_check(ip_addr, url, servers, dns_codes):
 	print 'Updating complete'
 	return ip_addr_new
 
-
+def display(dns_table):
+	t = PrettyTable(['url', 'IP'])
+	
+	for key in dns_table:
+		t.add_row([key,dns_table[key]])
+	
+	print t
+	
 def run_server(port,server_list,dns_table):
 
 	dns_codes = {'dns_upd' : '0', 'dns_req' : '1', 'dns_serv_req' : '2'}
-	print 'Server running on port - ', port
+	print 'DNS Server up and running on port - ', port
 	server_list.remove(port)	#list of port nos
-	print server_list
+	print 'Other active DNS servers ', server_list
+
+	print '\nDNS table on this server is '
+	display(dns_table)
+
 	while(1):
 		# Wait for client to ping! 
-		print 'BEGINNING OF WHILE LOOP'
+		print '\n\nWaiting for Requests'
 		context = zmq.Context()
 		socket = context.socket(zmq.REP)
 		socket.bind("tcp://*:"+str(port))
 		response = socket.recv_string()
 		response=response.split(' ')
-		print response
+		print 'Request received - ', response
 		url=response[1]
 
 		if response[0]=='0':
-			print 'Updating DNS table'
-			
+			print 'Request received to update DNS table'
+
 			ip_addr_new = response[2]
 			dns_table[url]=ip_addr_new
 			
-			print 'UPDATED DNS TABLE\n',dns_table
+			print 'UPDATED DNS TABLE\n',display(dns_table)
 
 		elif response[0]=='1':
 			print 'Client requesting for IP of ', url
@@ -115,8 +126,9 @@ def run_server(port,server_list,dns_table):
 				ip_addr = 'Error - No entry found'
 				#add code to update
 			ip_addr_new = majority_check(ip_addr,url,server_list,dns_codes)
-			dns_table[url]=ip_addr_new
-			print 'UPDATED DNS TABLE\n',dns_table
+			if ip_addr_new.find('Error')!=0:
+				dns_table[url]=ip_addr_new
+				print 'UPDATED DNS TABLE\n',display(dns_table)
 			socket.send_string(ip_addr_new)	
 			
 		elif response[0]=='2':
@@ -142,16 +154,15 @@ server_list = args[2:]
 
 f = open(dns_table_path)
 lines = f.read()
-print lines
+#print lines
 line_list = lines.split('\n')
-print line_list
+#print line_list
 
 dns_table = {}
 for rec in line_list:
 	dns_text = rec.split(' ')
-	print dns_text
+	#print dns_text
 	dns_table[dns_text[0]] = dns_text[1] 
-
 
 #read dns table here
 '''

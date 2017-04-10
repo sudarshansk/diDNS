@@ -1,2 +1,0 @@
-default 8.8.8.8
-www.google.com 1.2.3.4
