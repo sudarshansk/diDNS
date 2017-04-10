@@ -51,8 +51,9 @@ def majority_check(ip_addr, url, servers, dns_codes):
 	
 	try:
 		quorum_size = sum(dicti.values())
-		print 'Quorum found with size ',quorum_size
+		print ' Number of DNS servers that reply ',quorum_size
 		max_count = sorted(dicti.values(),reverse=True)[0]
+		print 'Required quorum size', quorum_size/2 + 1
 		print 'Max count is ',max_count
 		if max_count>quorum_size/2.0:
 			for key,value in dicti.iteritems():

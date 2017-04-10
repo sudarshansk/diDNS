@@ -17,7 +17,7 @@ for port in servers:
 print a
 server_paths=[]
 for port in servers:
-	dns_path='cases/case1'
+	dns_path='cases/case2'
 	dns_path = dns_path+'/'+str(port)+'.txt '
 	print dns_path
 	cmd = "python dns_server.py "+str(port)+" "+dns_path+a
